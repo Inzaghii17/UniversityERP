@@ -2,37 +2,25 @@ package edu.univ.erp.data;
 
 import edu.univ.erp.domain.Section;
 import edu.univ.erp.util.DBUtil;
+
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SectionDAO {
 
-    public static List<Section> getAllSections() throws SQLException {
-        List<Section> list = new ArrayList<>();
-        String sql = "SELECT section_id, course_id, instructor_id, semester, year, capacity, day_time, room FROM sections";
-        try (Connection c = DBUtil.getERPConnection();
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                Section s = new Section();
-                s.setSectionId(rs.getInt("section_id"));
-                s.setCourseId(rs.getInt("course_id"));
-                s.setInstructorId(rs.getInt("instructor_id"));
-                s.setSemester(rs.getString("semester"));
-                s.setYear(rs.getInt("year"));
-                s.setCapacity(rs.getInt("capacity"));
-                s.setDayTime(rs.getString("day_time"));
-                s.setRoom(rs.getString("room"));
-                list.add(s);
-            }
-        }
-        return list;
-    }
-
+    // -------------------------------
+    // ADMIN: Add new section
+    // -------------------------------
     public static void addSection(Section s) throws SQLException {
-        String sql = "INSERT INTO sections (course_id, instructor_id, semester, year, capacity, day_time, room) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        try (Connection c = DBUtil.getERPConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+        String sql = """
+            INSERT INTO sections (course_id, instructor_id, semester, year, capacity, day_time, room)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """;
+
+        try (Connection con = DBUtil.getERPConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
             ps.setInt(1, s.getCourseId());
             ps.setInt(2, s.getInstructorId());
             ps.setString(3, s.getSemester());
@@ -44,18 +32,109 @@ public class SectionDAO {
         }
     }
 
-    public static List<Section> listAll() {
-        List<Section> sections = new ArrayList<>();
-        String sql = "SELECT section_id, course_id, instructor_id, semester, year, capacity, day_time, room FROM sections";
+    // -------------------------------
+    // ADMIN: Update section
+    // -------------------------------
+    public static void updateSection(Section s) throws SQLException {
+        String sql = """
+            UPDATE sections
+            SET course_id=?, instructor_id=?, semester=?, year=?, capacity=?, day_time=?, room=?
+            WHERE section_id=?
+        """;
 
-        try (Connection conn = DBUtil.getERPConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
+        try (Connection con = DBUtil.getERPConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, s.getCourseId());
+            ps.setInt(2, s.getInstructorId());
+            ps.setString(3, s.getSemester());
+            ps.setInt(4, s.getYear());
+            ps.setInt(5, s.getCapacity());
+            ps.setString(6, s.getDayTime());
+            ps.setString(7, s.getRoom());
+            ps.setInt(8, s.getSectionId());
+            ps.executeUpdate();
+        }
+    }
+
+    // -------------------------------
+    // ADMIN: Delete section
+    // -------------------------------
+    public static void deleteSection(int sectionId) throws SQLException {
+        String sql = "DELETE FROM sections WHERE section_id=?";
+        try (Connection con = DBUtil.getERPConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, sectionId);
+            ps.executeUpdate();
+        }
+    }
+
+    // -------------------------------
+    // ADMIN: List all sections
+    // -------------------------------
+    public static List<Section> getAllSections() {
+        List<Section> list = new ArrayList<>();
+
+        String sql = """
+            SELECT s.*, c.code AS course_code, c.title AS course_title,
+                   (SELECT username FROM auth_db.users u WHERE u.user_id = s.instructor_id) AS instructor_name
+            FROM sections s
+            JOIN courses c ON s.course_id = c.course_id
+            ORDER BY s.section_id
+        """;
+
+        try (Connection con = DBUtil.getERPConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 Section s = new Section();
                 s.setSectionId(rs.getInt("section_id"));
                 s.setCourseId(rs.getInt("course_id"));
+                s.setCourseCode(rs.getString("course_code"));
+                s.setCourseTitle(rs.getString("course_title"));
+                s.setInstructorId(rs.getInt("instructor_id"));
+                s.setInstructorName(rs.getString("instructor_name"));
+                s.setSemester(rs.getString("semester"));
+                s.setYear(rs.getInt("year"));
+                s.setCapacity(rs.getInt("capacity"));
+                s.setDayTime(rs.getString("day_time"));
+                s.setRoom(rs.getString("room"));
+
+                list.add(s);
+            }
+
+        } catch (Exception e) { e.printStackTrace(); }
+
+        return list;
+    }
+
+    // -------------------------------
+    // INSTRUCTOR: Get their sections
+    // -------------------------------
+    public static List<Section> getSectionsByInstructor(int instructorId) {
+        List<Section> list = new ArrayList<>();
+
+        String sql = """
+            SELECT s.*, c.code AS course_code, c.title AS course_title
+            FROM sections s
+            JOIN courses c ON s.course_id = c.course_id
+            WHERE instructor_id=?
+        """;
+
+        try (Connection con = DBUtil.getERPConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, instructorId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Section s = new Section();
+                s.setSectionId(rs.getInt("section_id"));
+                s.setCourseId(rs.getInt("course_id"));
+                s.setCourseCode(rs.getString("course_code"));
+                s.setCourseTitle(rs.getString("course_title"));
                 s.setInstructorId(rs.getInt("instructor_id"));
                 s.setSemester(rs.getString("semester"));
                 s.setYear(rs.getInt("year"));
@@ -63,15 +142,11 @@ public class SectionDAO {
                 s.setDayTime(rs.getString("day_time"));
                 s.setRoom(rs.getString("room"));
 
-                sections.add(s);
+                list.add(s);
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("❌ Error fetching sections: " + e.getMessage());
-        }
+        } catch (Exception e) { e.printStackTrace(); }
 
-        return sections;
+        return list;
     }
-
 }

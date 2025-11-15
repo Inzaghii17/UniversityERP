@@ -5,8 +5,18 @@ public class Course {
     private String code;
     private String title;
     private int credits;
+    private int capacity; // optional convenience
 
-    // Getters and setters
+    public Course() {}
+
+    public Course(int courseId, String code, String title, int credits) {
+        this.courseId = courseId;
+        this.code = code;
+        this.title = title;
+        this.credits = credits;
+    }
+
+    // getters / setters
     public int getCourseId() { return courseId; }
     public void setCourseId(int courseId) { this.courseId = courseId; }
 
@@ -18,4 +28,7 @@ public class Course {
 
     public int getCredits() { return credits; }
     public void setCredits(int credits) { this.credits = credits; }
+
+    public int getCapacity() { return capacity; }
+    public void setCapacity(int capacity) { this.capacity = capacity; }
 }

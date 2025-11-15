@@ -32,7 +32,7 @@ public class InstructorDashboard extends JFrame {
         refresh.addActionListener(e -> {
             try {
                 area.setText("");
-                List<Section> all = SectionDAO.listAll();
+                List<Section> all = SectionDAO.getAllSections();
                 for (Section s : all) {
                     if (s.getInstructorId() == user.getUserId()) {
                         area.append(String.format("Sec %d - %s (%s) %s %d cap:%d\n", s.getSectionId(), s.getCourseCode(), s.getCourseTitle(), s.getSemester(), s.getYear(), s.getCapacity()));
