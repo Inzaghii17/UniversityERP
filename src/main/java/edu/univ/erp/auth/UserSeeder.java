@@ -11,25 +11,19 @@ public class UserSeeder {
     }
 
     private static void addUser(String username, String role, String password) {
-        try (Connection c = DBUtil.getAuthConnection()) {
+        try (Connection conn = DBUtil.getAuthConnection()) {
             String hash = PasswordUtils.hashPassword(password);
 
-            // Delete existing user if any
-            try (PreparedStatement del = c.prepareStatement("DELETE FROM users WHERE username=?")) {
-                del.setString(1, username);
-                del.executeUpdate();
-            }
-
-            // Insert new one
-            try (PreparedStatement ps = c.prepareStatement(
-                    "INSERT INTO users (username, role, password_hash) VALUES (?, ?, ?)")) {
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "INSERT INTO users (username, role, password_hash) VALUES (?, ?, ?) " +
+                            "ON DUPLICATE KEY UPDATE password_hash=VALUES(password_hash), role=VALUES(role)"
+            )) {
                 ps.setString(1, username);
                 ps.setString(2, role);
                 ps.setString(3, hash);
                 ps.executeUpdate();
+                System.out.println("✅ User added/updated: " + username + " (" + role + ")");
             }
-
-            System.out.println("✅ Created user: " + username + " (" + role + ")");
         } catch (Exception e) {
             e.printStackTrace();
         }

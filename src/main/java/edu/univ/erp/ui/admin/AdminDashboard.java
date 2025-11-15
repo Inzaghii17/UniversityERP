@@ -44,6 +44,9 @@ public class AdminDashboard extends JFrame {
         manageCoursesBtn.addActionListener(e -> new ManageCoursesFrame().setVisible(true));
         buttons.add(manageCoursesBtn);
 
+        JButton manageSectionsBtn = new JButton("Manage Sections");
+        manageSectionsBtn.addActionListener(e -> new ManageSectionsFrame().setVisible(true));
+        buttons.add(manageSectionsBtn);
 
         // Button 2: Manage Users
         JButton manageUsersBtn = new JButton("Manage Users");
