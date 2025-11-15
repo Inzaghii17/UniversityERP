@@ -14,7 +14,7 @@ public class LoginFrame extends JFrame {
     private final JPasswordField passwordField;
 
     public LoginFrame() {
-        setTitle("University ERP - Login");
+        setTitle("University ERP");
         setSize(420, 220);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

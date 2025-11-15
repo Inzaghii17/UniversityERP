@@ -2,43 +2,62 @@ package edu.univ.erp.data;
 
 import edu.univ.erp.domain.Course;
 import edu.univ.erp.util.DBUtil;
-
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class CourseDAO {
-    public static List<Course> listAll() throws SQLException {
-        String sql = "SELECT course_id, code, title, credits FROM courses";
-        try (Connection c = DBUtil.getERPConnection();
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            List<Course> out = new ArrayList<>();
-            while (rs.next()) {
-                Course co = new Course();
-                co.setCourseId(rs.getInt("course_id"));
-                co.setCode(rs.getString("code"));
-                co.setTitle(rs.getString("title"));
-                co.setCredits(rs.getInt("credits"));
-                out.add(co);
-            }
-            return out;
+
+    // Add new course
+    public static void addCourse(Course c) throws SQLException {
+        String sql = "INSERT INTO courses (code, title, credits) VALUES (?, ?, ?)";
+        try (Connection conn = DBUtil.getERPConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, c.getCode());
+            ps.setString(2, c.getTitle());
+            ps.setInt(3, c.getCredits());
+            ps.executeUpdate();
         }
     }
 
-    public static int create(Course course) throws SQLException {
-        String sql = "INSERT INTO courses (code, title, credits) VALUES (?, ?, ?)";
-        try (Connection c = DBUtil.getERPConnection();
-             PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, course.getCode());
-            ps.setString(2, course.getTitle());
-            ps.setInt(3, course.getCredits());
+    // Update existing course
+    public static void updateCourse(Course c) throws SQLException {
+        String sql = "UPDATE courses SET code=?, title=?, credits=? WHERE course_id=?";
+        try (Connection conn = DBUtil.getERPConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, c.getCode());
+            ps.setString(2, c.getTitle());
+            ps.setInt(3, c.getCredits());
+            ps.setInt(4, c.getCourseId());
             ps.executeUpdate();
-            try (ResultSet g = ps.getGeneratedKeys()) {
-                if (g.next()) return g.getInt(1);
-                else throw new SQLException("No course id");
+        }
+    }
+
+    // Delete a course
+    public static void deleteCourse(int courseId) throws SQLException {
+        String sql = "DELETE FROM courses WHERE course_id=?";
+        try (Connection conn = DBUtil.getERPConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, courseId);
+            ps.executeUpdate();
+        }
+    }
+
+    // Get all courses
+    public static List<Course> getAllCourses() throws SQLException {
+        List<Course> list = new ArrayList<>();
+        String sql = "SELECT * FROM courses";
+        try (Connection conn = DBUtil.getERPConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Course c = new Course();
+                c.setCourseId(rs.getInt("course_id"));
+                c.setCode(rs.getString("code"));
+                c.setTitle(rs.getString("title"));
+                c.setCredits(rs.getInt("credits"));
+                list.add(c);
             }
         }
+        return list;
     }
 }
-
