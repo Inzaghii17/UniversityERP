@@ -14,7 +14,7 @@ public class GradesDAO {
         List<Grade> list = new ArrayList<>();
 
         String sql = """
-            SELECT * FROM grades WHERE student_id=?
+            SELECT * FROM grades WHERE user_id=?
         """;
 
         try (Connection con = DBUtil.getERPConnection();
