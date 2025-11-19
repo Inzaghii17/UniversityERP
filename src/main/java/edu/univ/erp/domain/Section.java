@@ -13,6 +13,11 @@ public class Section {
     private String dayTime;
     private String room;
 
+    // NEW — grading weights
+    private int quizWeight = 20;
+    private int midsemWeight = 30;
+    private int endsemWeight = 50;
+
     public Section() {}
 
     // getters/setters
@@ -48,4 +53,16 @@ public class Section {
 
     public String getRoom() { return room; }
     public void setRoom(String room) { this.room = room; }
+
+    // ============================
+    // NEW WEIGHT getters/setters
+    // ============================
+    public int getQuizWeight() { return quizWeight; }
+    public void setQuizWeight(int quizWeight) { this.quizWeight = quizWeight; }
+
+    public int getMidsemWeight() { return midsemWeight; }
+    public void setMidsemWeight(int midsemWeight) { this.midsemWeight = midsemWeight; }
+
+    public int getEndsemWeight() { return endsemWeight; }
+    public void setEndsemWeight(int endsemWeight) { this.endsemWeight = endsemWeight; }
 }

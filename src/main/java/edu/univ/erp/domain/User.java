@@ -15,4 +15,6 @@ public class User {
     public void setUserId(int userId) { this.userId = userId; }
     public void setUsername(String username) { this.username = username; }
     public void setRole(String role) { this.role = role; }
+
+
 }

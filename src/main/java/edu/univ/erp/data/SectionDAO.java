@@ -14,8 +14,9 @@ public class SectionDAO {
     // -------------------------------
     public static void addSection(Section s) throws SQLException {
         String sql = """
-            INSERT INTO sections (course_id, instructor_id, semester, year, capacity, day_time, room)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO sections (course_id, instructor_id, semester, year, capacity, day_time, room,
+                                  quiz_weight, midsem_weight, endsem_weight)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """;
 
         try (Connection con = DBUtil.getERPConnection();
@@ -28,6 +29,12 @@ public class SectionDAO {
             ps.setInt(5, s.getCapacity());
             ps.setString(6, s.getDayTime());
             ps.setString(7, s.getRoom());
+
+            // NEW weight fields
+            ps.setInt(8, s.getQuizWeight());
+            ps.setInt(9, s.getMidsemWeight());
+            ps.setInt(10, s.getEndsemWeight());
+
             ps.executeUpdate();
         }
     }
@@ -38,7 +45,8 @@ public class SectionDAO {
     public static void updateSection(Section s) throws SQLException {
         String sql = """
             UPDATE sections
-            SET course_id=?, instructor_id=?, semester=?, year=?, capacity=?, day_time=?, room=?
+            SET course_id=?, instructor_id=?, semester=?, year=?, capacity=?, day_time=?, room=?,
+                quiz_weight=?, midsem_weight=?, endsem_weight=?
             WHERE section_id=?
         """;
 
@@ -52,7 +60,12 @@ public class SectionDAO {
             ps.setInt(5, s.getCapacity());
             ps.setString(6, s.getDayTime());
             ps.setString(7, s.getRoom());
-            ps.setInt(8, s.getSectionId());
+
+            ps.setInt(8, s.getQuizWeight());
+            ps.setInt(9, s.getMidsemWeight());
+            ps.setInt(10, s.getEndsemWeight());
+
+            ps.setInt(11, s.getSectionId());
             ps.executeUpdate();
         }
     }
@@ -102,6 +115,11 @@ public class SectionDAO {
                 s.setDayTime(rs.getString("day_time"));
                 s.setRoom(rs.getString("room"));
 
+                // NEW weights
+                s.setQuizWeight(rs.getInt("quiz_weight"));
+                s.setMidsemWeight(rs.getInt("midsem_weight"));
+                s.setEndsemWeight(rs.getInt("endsem_weight"));
+
                 list.add(s);
             }
 
@@ -142,11 +160,43 @@ public class SectionDAO {
                 s.setDayTime(rs.getString("day_time"));
                 s.setRoom(rs.getString("room"));
 
+                // NEW weights
+                s.setQuizWeight(rs.getInt("quiz_weight"));
+                s.setMidsemWeight(rs.getInt("midsem_weight"));
+                s.setEndsemWeight(rs.getInt("endsem_weight"));
+
                 list.add(s);
             }
 
         } catch (Exception e) { e.printStackTrace(); }
 
         return list;
+    }
+
+    // -------------------------------
+    // INSTRUCTOR: Update only weights
+    // -------------------------------
+    public static boolean updateWeights(int sectionId, int q, int m, int e) {
+        String sql = """
+            UPDATE sections 
+            SET quiz_weight=?, midsem_weight=?, endsem_weight=?
+            WHERE section_id=?
+        """;
+
+        try (Connection con = DBUtil.getERPConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, q);
+            ps.setInt(2, m);
+            ps.setInt(3, e);
+            ps.setInt(4, sectionId);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return false;
     }
 }

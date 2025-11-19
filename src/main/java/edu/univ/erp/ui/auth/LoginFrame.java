@@ -63,7 +63,9 @@ public class LoginFrame extends JFrame {
         // LOGIN PANEL CONTENT
         JPanel loginPanel = new JPanel();
         loginPanel.setLayout(new BoxLayout(loginPanel, BoxLayout.Y_AXIS));
+
         loginPanel.setOpaque(false);
+
 
         JLabel signInLabel = new JLabel("Login to your Account");
         signInLabel.setFont(new Font("Segoe UI", Font.BOLD, 26));
@@ -238,7 +240,15 @@ public class LoginFrame extends JFrame {
 
             switch (loggedInUser.getRole()) {
                 case "ADMIN" -> new AdminDashboard(loggedInUser).setVisible(true);
-                case "INSTRUCTOR" -> new InstructorDashboard(loggedInUser).setVisible(true);
+                case "INSTRUCTOR" -> {
+                    JFrame f = new JFrame("Instructor Dashboard - " + loggedInUser.getUsername());
+                    f.setContentPane(new InstructorDashboard(loggedInUser.getUserId()));
+                    f.setSize(900, 600);
+                    f.setLocationRelativeTo(null);
+                    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                    f.setVisible(true);
+                }
+
                 case "STUDENT" -> new StudentDashboard(loggedInUser).setVisible(true);
             }
 

@@ -47,8 +47,14 @@ public class RegistrationDAO {
         return 0;
     }
 
-    // Perform a registration
+    // Perform a registration (now protected against duplicates)
     public static boolean register(int userId, int sectionId) {
+
+        // 🔥 PREVENT DUPLICATE REGISTRATION
+        if (isRegistered(userId, sectionId)) {
+            return false;
+        }
+
         String sql = "INSERT INTO registrations (user_id, section_id) VALUES (?, ?)";
         try (Connection con = DBUtil.getERPConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
