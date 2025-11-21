@@ -8,6 +8,10 @@ import edu.univ.erp.domain.User;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * A quick panel for viewing averages per selected section.
+ * Uses GradesDAO.getAverages(sectionId) which you already have.
+ */
 public class StatsPanel extends JPanel {
 
     private final JComboBox<Section> sectionDropdown = new JComboBox<>();

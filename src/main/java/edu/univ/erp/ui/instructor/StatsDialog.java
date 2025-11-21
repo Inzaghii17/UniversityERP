@@ -5,64 +5,51 @@ import edu.univ.erp.domain.Grade;
 
 import javax.swing.*;
 import java.awt.*;
-import java.sql.SQLException;
 import java.util.DoubleSummaryStatistics;
 import java.util.List;
 
+/**
+ * Simple modal to show class stats using GradesDAO.getGradesBySection.
+ */
 public class StatsDialog extends JDialog {
 
     public StatsDialog(Frame owner, int sectionId) {
-        super(owner, "Class Stats", true);
-        setSize(480, 320);
-        setLayout(new BorderLayout());
+        super(owner, "Class Statistics", true);
+        setSize(520, 360);
+        setLocationRelativeTo(owner);
+        setLayout(new BorderLayout(8,8));
 
-        List<Grade> grades = GradesDAO.getGradesBySection(sectionId);
+        JTextArea area = new JTextArea();
+        area.setEditable(false);
+        add(new JScrollPane(area), BorderLayout.CENTER);
 
-        JPanel p = new JPanel();
-        p.setLayout(new GridLayout(0,1,6,6));
-        p.setBorder(BorderFactory.createEmptyBorder(12,12,12,12));
+        try {
+            List<Grade> grades = GradesDAO.getGradesBySection(sectionId);
+            DoubleSummaryStatistics q = grades.stream().filter(g -> g.getQuiz() != null).mapToDouble(g -> g.getQuiz()).summaryStatistics();
+            DoubleSummaryStatistics m = grades.stream().filter(g -> g.getMidsem() != null).mapToDouble(g -> g.getMidsem()).summaryStatistics();
+            DoubleSummaryStatistics e = grades.stream().filter(g -> g.getEndsem() != null).mapToDouble(g -> g.getEndsem()).summaryStatistics();
 
-        p.add(new JLabel("Students with grade rows: " + grades.size()));
+            StringBuilder sb = new StringBuilder();
+            sb.append("Rows: ").append(grades.size()).append("\n\n");
+            sb.append("Quiz  - avg: ").append(formatStat(q)).append("\n");
+            sb.append("Mid   - avg: ").append(formatStat(m)).append("\n");
+            sb.append("End   - avg: ").append(formatStat(e)).append("\n");
 
-        DoubleSummaryStatistics quizStats = grades.stream()
-                .filter(g -> g.getQuiz() != null)
-                .mapToDouble(g -> g.getQuiz())
-                .summaryStatistics();
-        p.add(new JLabel("Quiz - avg: " + safe(quizStats.getAverage()) + "  min: " + safe(quizStats.getMin()) + "  max: " + safe(quizStats.getMax())));
-
-        DoubleSummaryStatistics midStats = grades.stream()
-                .filter(g -> g.getMidsem() != null)
-                .mapToDouble(g -> g.getMidsem())
-                .summaryStatistics();
-        p.add(new JLabel("Midsem - avg: " + safe(midStats.getAverage()) + "  min: " + safe(midStats.getMin()) + "  max: " + safe(midStats.getMax())));
-
-        DoubleSummaryStatistics endStats = grades.stream()
-                .filter(g -> g.getEndsem() != null)
-                .mapToDouble(g -> g.getEndsem())
-                .summaryStatistics();
-        p.add(new JLabel("Endsem - avg: " + safe(endStats.getAverage()) + "  min: " + safe(endStats.getMin()) + "  max: " + safe(endStats.getMax())));
-
-        DoubleSummaryStatistics finalStats = grades.stream()
-                .map(g -> {
-                    try { return Double.valueOf(g.getFinalGrade()); }
-                    catch (Exception ex) { return Double.NaN; }
-                })
-                .filter(d -> !Double.isNaN(d))
-                .mapToDouble(d -> d)
-                .summaryStatistics();
-        p.add(new JLabel("Final - avg: " + safe(finalStats.getAverage()) + "  min: " + safe(finalStats.getMin()) + "  max: " + safe(finalStats.getMax())));
-
-        add(new JScrollPane(p), BorderLayout.CENTER);
+            area.setText(sb.toString());
+        } catch (Exception ex) {
+            area.setText("Failed to load stats: " + ex.getMessage());
+            ex.printStackTrace();
+        }
 
         JPanel bottom = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton ok = new JButton("Close");
-        ok.addActionListener(e -> dispose());
-        bottom.add(ok);
+        JButton btnClose = new JButton("Close");
+        btnClose.addActionListener(e -> dispose());
+        bottom.add(btnClose);
         add(bottom, BorderLayout.SOUTH);
     }
 
-    private String safe(double v) {
-        if (Double.isNaN(v) || Double.isInfinite(v)) return "N/A";
-        return String.format("%.2f", v);
+    private String formatStat(DoubleSummaryStatistics s) {
+        if (s == null || s.getCount() == 0) return "N/A";
+        return String.format("%.2f (min: %.2f max: %.2f)", s.getAverage(), s.getMin(), s.getMax());
     }
 }
