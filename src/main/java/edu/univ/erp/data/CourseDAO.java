@@ -10,11 +10,7 @@ import java.util.List;
 
 public class CourseDAO {
 
-    // -------------------------------------
-    // ADMIN FEATURES (add / update / delete)
-    // -------------------------------------
 
-    // Add new course
     public static void addCourse(Course c) throws SQLException {
         String sql = "INSERT INTO courses (code, title, credits) VALUES (?, ?, ?)";
         try (Connection conn = DBUtil.getERPConnection();
@@ -27,7 +23,7 @@ public class CourseDAO {
         }
     }
 
-    // Update existing course
+
     public static void updateCourse(Course c) throws SQLException {
         String sql = "UPDATE courses SET code=?, title=?, credits=? WHERE course_id=?";
         try (Connection conn = DBUtil.getERPConnection();
@@ -41,7 +37,6 @@ public class CourseDAO {
         }
     }
 
-    // Delete a course
     public static void deleteCourse(int courseId) throws SQLException {
         String sql = "DELETE FROM courses WHERE course_id=?";
         try (Connection conn = DBUtil.getERPConnection();
@@ -52,7 +47,7 @@ public class CourseDAO {
         }
     }
 
-    // Get all courses (for admin Manage Courses page)
+
     public static List<Course> getAllCourses() throws SQLException {
         List<Course> list = new ArrayList<>();
         String sql = "SELECT * FROM courses";
@@ -73,11 +68,6 @@ public class CourseDAO {
         return list;
     }
 
-    // -------------------------------------
-    // STUDENT FEATURES (course catalog)
-    // -------------------------------------
-
-    // Returns all sections with course info + instructor info
     public static List<Section> getCatalogSections() {
         List<Section> list = new ArrayList<>();
         String sql = """

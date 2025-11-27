@@ -54,9 +54,7 @@ public class Section {
     public String getRoom() { return room; }
     public void setRoom(String room) { this.room = room; }
 
-    // ============================
-    // NEW WEIGHT getters/setters
-    // ============================
+
     public int getQuizWeight() { return quizWeight; }
     public void setQuizWeight(int quizWeight) { this.quizWeight = quizWeight; }
 
@@ -65,4 +63,10 @@ public class Section {
 
     public int getEndsemWeight() { return endsemWeight; }
     public void setEndsemWeight(int endsemWeight) { this.endsemWeight = endsemWeight; }
+
+    @Override
+    public String toString() {
+        return courseCode + " – " + courseTitle + " (Sec " + sectionId + ")";
+    }
+
 }

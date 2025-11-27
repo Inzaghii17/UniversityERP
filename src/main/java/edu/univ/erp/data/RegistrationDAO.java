@@ -9,7 +9,6 @@ import java.util.List;
 
 public class RegistrationDAO {
 
-    // Check if user already registered
     public static boolean isRegistered(int userId, int sectionId) {
         String sql = "SELECT 1 FROM registrations WHERE user_id=? AND section_id=?";
         try (Connection con = DBUtil.getERPConnection();
@@ -26,7 +25,6 @@ public class RegistrationDAO {
         return false;
     }
 
-    // Seats left = capacity - current count
     public static int seatsLeft(int sectionId) {
         String sql = """
             SELECT capacity - COUNT(r.user_id) AS free_seats
@@ -47,10 +45,10 @@ public class RegistrationDAO {
         return 0;
     }
 
-    // Perform a registration (now protected against duplicates)
+
     public static boolean register(int userId, int sectionId) {
 
-        // 🔥 PREVENT DUPLICATE REGISTRATION
+
         if (isRegistered(userId, sectionId)) {
             return false;
         }
@@ -81,7 +79,6 @@ public class RegistrationDAO {
         return false;
     }
 
-    // Get all registered sections for a student
     public static List<Section> getRegisteredSections(int userId) {
         List<Section> list = new ArrayList<>();
 

@@ -15,7 +15,7 @@ public class AuthService {
         if (!PasswordUtils.checkPassword(password, hash)) return null;
         User u = AuthDAO.findByUsername(username);
         if (u == null) return null;
-        // load profile if student
+
         if ("STUDENT".equalsIgnoreCase(u.getRole())) {
             Student s = StudentDAO.findByUserId(u.getUserId());
             if (s != null) {
@@ -26,4 +26,27 @@ public class AuthService {
         }
         return u;
     }
+    public static boolean changePassword(int userId, String oldPlain, String newPlain) throws Exception {
+
+
+        String username = AuthDAO.getUsernameById(userId);
+        if (username == null) throw new Exception("User not found.");
+
+
+        String stored = AuthDAO.getPasswordHash(username);
+        if (stored == null) throw new Exception("Stored password missing!");
+
+
+        boolean ok = PasswordUtils.checkPassword(oldPlain, stored);
+        if (!ok) return false;
+
+
+        String newHash = PasswordUtils.hashPassword(newPlain);
+
+
+        boolean updated = AuthDAO.updatePasswordHash(userId, newHash);
+
+        return updated;
+    }
+
 }

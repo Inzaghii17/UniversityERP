@@ -7,7 +7,7 @@ import java.sql.*;
 
 public class StudentDAO {
 
-    // FIND student profile by userId
+
     public static Student findByUserId(int userId) throws SQLException {
 
         String sql = "SELECT user_id, roll_no, program, year FROM students WHERE user_id = ?";
@@ -32,7 +32,7 @@ public class StudentDAO {
         return null;
     }
 
-    // CREATE profile
+
     public static void createProfile(int userId, String rollNo, String program, int year) throws SQLException {
 
         String sql = "INSERT INTO students (user_id, roll_no, program, year) VALUES (?, ?, ?, ?)";

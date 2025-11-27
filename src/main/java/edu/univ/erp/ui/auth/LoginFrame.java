@@ -1,6 +1,6 @@
 package edu.univ.erp.ui.auth;
 
-import edu.univ.erp.data.SettingsDAO;
+import edu.univ.erp.access.AccessControl;
 import edu.univ.erp.domain.User;
 import edu.univ.erp.service.AuthService;
 import edu.univ.erp.ui.admin.AdminDashboard;
@@ -12,6 +12,13 @@ import javax.swing.border.*;
 import java.awt.*;
 
 public class LoginFrame extends JFrame {
+    private static final java.util.concurrent.ConcurrentHashMap<String, Attempt> attempts =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
+    private static class Attempt {
+        int count = 0;
+        long lockedUntilMs = 0L;
+    }
 
     private JTextField usernameField;
     private JPasswordField passwordField;
@@ -38,11 +45,10 @@ public class LoginFrame extends JFrame {
             }
         };
 
-        // FIXED WIDTH PREVENTS STRETCHING IN FULLSCREEN
         leftPanel.setPreferredSize(new Dimension(450, 0));
         leftPanel.setMinimumSize(new Dimension(450, 0));
         leftPanel.setMaximumSize(new Dimension(450, Integer.MAX_VALUE));
-        leftPanel.setLayout(null); // Your PNG contains all design elements
+        leftPanel.setLayout(null);
 
         // ============================================================
         // RIGHT SIDE CONTAINER
@@ -60,22 +66,17 @@ public class LoginFrame extends JFrame {
                 new EmptyBorder(30, 40, 30, 40)
         ));
 
-        // LOGIN PANEL CONTENT
         JPanel loginPanel = new JPanel();
         loginPanel.setLayout(new BoxLayout(loginPanel, BoxLayout.Y_AXIS));
-
         loginPanel.setOpaque(false);
-
 
         JLabel signInLabel = new JLabel("Login to your Account");
         signInLabel.setFont(new Font("Segoe UI", Font.BOLD, 26));
         signInLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // USERNAME FIELD
         usernameField = new JTextField();
         styleTextField(usernameField, "Username");
 
-        // PASSWORD FIELD (WITH CORRECT HIDING LOGIC)
         passwordField = new JPasswordField();
         stylePasswordField(passwordField, "Password");
 
@@ -85,7 +86,6 @@ public class LoginFrame extends JFrame {
         remember.setAlignmentX(Component.RIGHT_ALIGNMENT);
         remember.setBorder(new EmptyBorder(0, 0, 0, 10));
 
-        // LOGIN BUTTON
         JButton loginBtn = new JButton("Login");
         loginBtn.setFont(new Font("Segoe UI", Font.BOLD, 18));
         loginBtn.setForeground(Color.WHITE);
@@ -107,7 +107,6 @@ public class LoginFrame extends JFrame {
 
         loginBtn.addActionListener(e -> doLogin());
 
-        // ADD ITEMS TO LOGIN PANEL
         loginPanel.add(signInLabel);
         loginPanel.add(Box.createVerticalStrut(25));
         loginPanel.add(usernameField);
@@ -118,10 +117,8 @@ public class LoginFrame extends JFrame {
         loginPanel.add(Box.createVerticalStrut(25));
         loginPanel.add(loginBtn);
 
-        // ADD TO CARD
         loginCard.add(loginPanel);
 
-        // CENTER CARD
         rightContainer.add(loginCard, new GridBagConstraints());
 
         add(leftPanel, BorderLayout.WEST);
@@ -130,11 +127,7 @@ public class LoginFrame extends JFrame {
         setVisible(true);
     }
 
-    // ============================================================
-    // STYLE NORMAL TEXT FIELD
-    // ============================================================
     private void styleTextField(JComponent field, String placeholder) {
-
         field.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         field.setPreferredSize(new Dimension(300, 40));
         field.setMaximumSize(new Dimension(300, 40));
@@ -145,12 +138,10 @@ public class LoginFrame extends JFrame {
         ));
 
         if (field instanceof JTextField tf) {
-
             tf.setForeground(new Color(150, 150, 150));
             tf.setText(placeholder);
 
             tf.addFocusListener(new java.awt.event.FocusAdapter() {
-
                 @Override
                 public void focusGained(java.awt.event.FocusEvent e) {
                     if (tf.getText().equals(placeholder)) {
@@ -170,9 +161,6 @@ public class LoginFrame extends JFrame {
         }
     }
 
-    // ============================================================
-    // STYLE PASSWORD FIELD (FIXED)
-    // ============================================================
     private void stylePasswordField(JPasswordField pf, String placeholder) {
 
         pf.setFont(new Font("Segoe UI", Font.PLAIN, 16));
@@ -189,22 +177,19 @@ public class LoginFrame extends JFrame {
         pf.setText(placeholder);
 
         pf.addFocusListener(new java.awt.event.FocusAdapter() {
-
             @Override
             public void focusGained(java.awt.event.FocusEvent e) {
                 String text = new String(pf.getPassword());
-
                 if (text.equals(placeholder)) {
                     pf.setText("");
                     pf.setForeground(Color.BLACK);
-                    pf.setEchoChar('•'); // enable masking
+                    pf.setEchoChar('•');
                 }
             }
 
             @Override
             public void focusLost(java.awt.event.FocusEvent e) {
                 String text = new String(pf.getPassword());
-
                 if (text.isEmpty()) {
                     pf.setForeground(new Color(150, 150, 150));
                     pf.setEchoChar((char) 0);
@@ -214,36 +199,56 @@ public class LoginFrame extends JFrame {
         });
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new LoginFrame().setVisible(true));
-    }
-
     // ============================================================
-    // LOGIN LOGIC
+    // FIXED LOGIN LOGIC (Maintenance DOES NOT block login)
     // ============================================================
     private void doLogin() {
         try {
-            if (SettingsDAO.isMaintenance()) {
-                JOptionPane.showMessageDialog(this, "System is under maintenance. Try later.");
+            String user = usernameField.getText().trim();
+            String pass = new String(passwordField.getPassword());
+
+            if (user.isEmpty() || pass.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Enter username and password.");
                 return;
             }
 
-            String user = usernameField.getText();
-            String pass = new String(passwordField.getPassword());
+            Attempt att = attempts.computeIfAbsent(user, k -> new Attempt());
+            long now = System.currentTimeMillis();
+
+            // Check lockout
+            if (att.lockedUntilMs > now) {
+                long remain = att.lockedUntilMs - now;
+                long mins = (remain / 1000) / 60;
+                long secs = (remain / 1000) % 60;
+                JOptionPane.showMessageDialog(this,
+                        "Account locked. Try again in " + mins + "m " + secs + "s.");
+                return;
+            }
 
             User loggedInUser = AuthService.login(user, pass);
 
             if (loggedInUser == null) {
-                JOptionPane.showMessageDialog(this, "Invalid credentials!", "Error", JOptionPane.ERROR_MESSAGE);
+                att.count++;
+
+                if (att.count >= 5) {
+                    att.lockedUntilMs = now + (5 * 60 * 1000);
+                    JOptionPane.showMessageDialog(this,
+                            "Too many failed attempts. Account locked for 5 minutes.");
+                } else {
+                    JOptionPane.showMessageDialog(this,
+                            "Invalid. Attempts left: " + (5 - att.count));
+                }
+
                 return;
             }
 
-            switch (loggedInUser.getRole()) {
-                case "ADMIN" -> new AdminDashboard(loggedInUser).setVisible(true);
+            // SUCCESS → reset
+            attempts.remove(user);
 
-
-                case "INSTRUCTOR" ->   new InstructorDashboard(loggedInUser).setVisible(true);
-                case "STUDENT" -> new StudentDashboard(loggedInUser).setVisible(true);
+            switch (loggedInUser.getRole().toUpperCase()) {
+                case "ADMIN" -> new edu.univ.erp.ui.admin.AdminDashboard(loggedInUser).setVisible(true);
+                case "INSTRUCTOR" -> new edu.univ.erp.ui.instructor.InstructorDashboard(loggedInUser).setVisible(true);
+                case "STUDENT" -> new edu.univ.erp.ui.student.StudentDashboard(loggedInUser).setVisible(true);
             }
 
             dispose();
@@ -251,5 +256,10 @@ public class LoginFrame extends JFrame {
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Login error: " + e.getMessage());
         }
+    }
+
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new LoginFrame().setVisible(true));
     }
 }

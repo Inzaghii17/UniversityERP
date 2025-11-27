@@ -36,6 +36,29 @@ public class AuthDAO {
             }
         }
     }
+    public static String getUsernameById(int userId) throws SQLException {
+        String sql = "SELECT username FROM users WHERE user_id = ?";
+        try (Connection c = DBUtil.getAuthConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getString("username") : null;
+            }
+        }
+    }
+
+    public static boolean updatePasswordHash(int userId, String newHash) throws SQLException {
+        String sql = "UPDATE users SET password_hash = ? WHERE user_id = ?";
+        try (Connection c = DBUtil.getAuthConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setString(1, newHash);
+            ps.setInt(2, userId);
+
+            return ps.executeUpdate() == 1;
+        }
+    }
+
 
     public static int createUser(String username, String role, String passwordHash) throws SQLException {
         String sql = "INSERT INTO users (username, role, password_hash) VALUES (?, ?, ?)";

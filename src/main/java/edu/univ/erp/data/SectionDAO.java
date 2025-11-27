@@ -9,9 +9,6 @@ import java.util.List;
 
 public class SectionDAO {
 
-    // -------------------------------
-    // ADMIN: Add new section
-    // -------------------------------
     public static void addSection(Section s) throws SQLException {
         String sql = """
             INSERT INTO sections (course_id, instructor_id, semester, year, capacity, day_time, room,
@@ -39,9 +36,7 @@ public class SectionDAO {
         }
     }
 
-    // -------------------------------
-    // ADMIN: Update section
-    // -------------------------------
+
     public static void updateSection(Section s) throws SQLException {
         String sql = """
             UPDATE sections
@@ -70,22 +65,21 @@ public class SectionDAO {
         }
     }
 
-    // -------------------------------
-    // ADMIN: Delete section
-    // -------------------------------
-    public static void deleteSection(int sectionId) throws SQLException {
-        String sql = "DELETE FROM sections WHERE section_id=?";
-        try (Connection con = DBUtil.getERPConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+
+
+    public static boolean deleteSection(int sectionId) throws Exception {
+        String sql = "DELETE FROM sections WHERE section_id = ?";
+
+        try (Connection conn = DBUtil.getERPConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, sectionId);
-            ps.executeUpdate();
+            return ps.executeUpdate() > 0;
         }
     }
 
-    // -------------------------------
-    // ADMIN: List all sections
-    // -------------------------------
+
+
     public static List<Section> getAllSections() {
         List<Section> list = new ArrayList<>();
 
@@ -128,9 +122,7 @@ public class SectionDAO {
         return list;
     }
 
-    // -------------------------------
-    // INSTRUCTOR: Get their sections
-    // -------------------------------
+
     public static List<Section> getSectionsByInstructor(int instructorId) {
         List<Section> list = new ArrayList<>();
 
@@ -173,9 +165,23 @@ public class SectionDAO {
         return list;
     }
 
-    // -------------------------------
-    // INSTRUCTOR: Update only weights
-    // -------------------------------
+    public static int countRegistrations(int sectionId) throws Exception {
+        String sql = "SELECT COUNT(*) FROM registrations WHERE section_id = ?";
+
+        try (Connection conn = DBUtil.getERPConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, sectionId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        }
+        return 0;
+    }
+
+
+
     public static boolean updateWeights(int sectionId, int q, int m, int e) {
         String sql = """
             UPDATE sections 

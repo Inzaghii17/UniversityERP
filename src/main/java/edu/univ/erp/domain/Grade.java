@@ -9,7 +9,7 @@ public class Grade {
     private Integer endsem;
     private String finalGrade;
 
-    // getters & setters
+
     public int getGradeId() { return gradeId; }
     public void setGradeId(int gradeId) { this.gradeId = gradeId; }
 

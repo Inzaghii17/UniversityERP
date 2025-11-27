@@ -3,12 +3,10 @@ package edu.univ.erp.data;
 import edu.univ.erp.util.DBUtil;
 import java.sql.*;
 
-/**
- * SettingsDAO handles global ERP system flags like maintenance mode.
- */
+
 public class SettingsDAO {
 
-    // Checks whether the system is under maintenance
+
     public static boolean isMaintenance() throws SQLException {
         String sql = "SELECT value FROM settings WHERE `key`='maintenance'";
         try (Connection c = DBUtil.getERPConnection();
@@ -21,7 +19,7 @@ public class SettingsDAO {
         }
     }
 
-    // Toggles maintenance mode true/false
+
     public static void toggleMaintenance() throws SQLException {
         boolean now = !isMaintenance();
         String sql = "UPDATE settings SET value=? WHERE `key`='maintenance'";

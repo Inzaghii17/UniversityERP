@@ -9,9 +9,7 @@ import java.util.List;
 
 public class GradesDAO {
 
-    // --------------------------
-    // STUDENT VIEW: Get grades
-    // --------------------------
+
     public static List<Grade> getGradesForStudent(int userId) {
         List<Grade> list = new ArrayList<>();
 
@@ -40,9 +38,6 @@ public class GradesDAO {
         return list;
     }
 
-    // --------------------------
-    // INSTRUCTOR: Students + grades
-    // --------------------------
     public static List<Grade> getStudentsInSection(int sectionId) {
         List<Grade> list = new ArrayList<>();
 
@@ -141,9 +136,6 @@ public class GradesDAO {
         return list;
     }
 
-    // --------------------------
-    // CLASS AVERAGES (old code kept)
-    // --------------------------
     public static double[] getAverages(int sectionId) {
         String sql = """
             SELECT AVG(quiz) AS aq,

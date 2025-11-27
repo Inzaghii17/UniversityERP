@@ -6,28 +6,17 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * InstructorService - lightweight service used by instructor UI.
- *
- * Exposes:
- *  - sectionGrades(sectionId) -> list of SectionGradeRow
- *  - saveComponentScores(enrollmentId, q, mid, end)
- *  - computeAndSaveFinalForSection(sectionId, wq, wm, we)
- *
- * Note: We purposely do NOT change DB schema. To avoid duplicate grade rows we
- * check existence (SELECT) and then either INSERT or UPDATE.
- */
 public class InstructorService {
 
     public static class SectionGradeRow {
-        public final int enrollmentId; // registrations.reg_id
-        public final int studentId;    // users.user_id
-        public final String rollNo;    // students.roll_no (may be null)
+        public final int enrollmentId;
+        public final int studentId;
+        public final String rollNo;
         public final Integer quiz;
         public final Integer midterm;
         public final Integer endsem;
-        public final Double finalScore; // percent computed (may be null)
-        public final String finalGrade; // letter (may be null)
+        public final Double finalScore;
+        public final String finalGrade;
 
         public SectionGradeRow(int enrollmentId, int studentId, String rollNo,
                                Integer quiz, Integer midterm, Integer endsem,
@@ -43,11 +32,6 @@ public class InstructorService {
         }
     }
 
-    /**
-     * Return all enrolled students for section with their current component scores
-     * and persisted final grade (letter). finalScore is computed on the fly only
-     * if quiz/mid/end are present and weights are default 20/30/50 (not saved).
-     */
     public List<SectionGradeRow> sectionGrades(int sectionId) throws SQLException {
         List<SectionGradeRow> out = new ArrayList<>();
 
@@ -77,7 +61,7 @@ public class InstructorService {
                     String fg = rs.getString("final_grade");
 
                     Double pct = null;
-                    // If components available, compute percent using default 20/30/50 (for preview)
+                    // default preview 20/30/50 (UI can override with its own weights)
                     if (quiz != null && mid != null && end != null) {
                         pct = quiz * 0.20 + mid * 0.30 + end * 0.50;
                     }
@@ -90,14 +74,8 @@ public class InstructorService {
         return out;
     }
 
-    /**
-     * Save component scores for a given enrollment (registration/reg_id).
-     * This will INSERT or UPDATE grades row for (user_id, section_id).
-     *
-     * We keep final_grade untouched here (so instructor can compute final later).
-     */
+
     public void saveComponentScores(int enrollmentId, Double quizD, Double midD, Double endD) throws SQLException {
-        // find user_id and section_id for this enrollment
         String lookup = "SELECT user_id, section_id FROM registrations WHERE reg_id = ?";
         try (Connection c = DBUtil.getERPConnection();
              PreparedStatement ps = c.prepareStatement(lookup)) {
@@ -108,12 +86,10 @@ public class InstructorService {
                 int userId = rs.getInt("user_id");
                 int sectionId = rs.getInt("section_id");
 
-                // convert Double -> Integer (store as whole number). Null stays null.
                 Integer quiz = quizD == null ? null : (int) Math.round(quizD);
                 Integer mid = midD == null ? null : (int) Math.round(midD);
                 Integer end = endD == null ? null : (int) Math.round(endD);
 
-                // check existing grade row
                 String sel = "SELECT grade_id, final_grade FROM grades WHERE user_id=? AND section_id=?";
                 Integer existingGradeId = null;
                 String existingFinal = null;
@@ -129,7 +105,6 @@ public class InstructorService {
                 }
 
                 if (existingGradeId != null) {
-                    // UPDATE existing row
                     String upd = "UPDATE grades SET quiz = ?, midsem = ?, endsem = ? WHERE grade_id = ?";
                     try (PreparedStatement psu = c.prepareStatement(upd)) {
                         if (quiz == null) psu.setNull(1, Types.INTEGER); else psu.setInt(1, quiz);
@@ -139,7 +114,6 @@ public class InstructorService {
                         psu.executeUpdate();
                     }
                 } else {
-                    // INSERT new row (final_grade left NULL)
                     String ins = "INSERT INTO grades (user_id, section_id, quiz, midsem, endsem, final_grade) VALUES (?, ?, ?, ?, ?, NULL)";
                     try (PreparedStatement psi = c.prepareStatement(ins)) {
                         psi.setInt(1, userId);
@@ -154,18 +128,10 @@ public class InstructorService {
         }
     }
 
-    /**
-     * Compute final percent and letter for every student in a section using given weights,
-     * then persist the letter into grades.final_grade for each (insert row if missing).
-     *
-     * Note: Database does not have a dedicated column for percent; we persist the letter only.
-     * If you want the percent saved as well, we would need to add a column (or store letter+percent
-     * in final_grade string).
-     */
+
     public void computeAndSaveFinalForSection(int sectionId, int wq, int wm, int we) throws SQLException {
         if (wq + wm + we != 100) throw new SQLException("Weights must sum to 100");
 
-        // Get all registrations for section
         String sql = """
             SELECT r.reg_id, r.user_id
             FROM registrations r
@@ -180,7 +146,6 @@ public class InstructorService {
                 while (rs.next()) {
                     int userId = rs.getInt("user_id");
 
-                    // fetch current components if any
                     String sel = "SELECT quiz, midsem, endsem FROM grades WHERE user_id=? AND section_id=?";
                     Integer quiz = null, mid = null, end = null;
                     try (PreparedStatement ps2 = c.prepareStatement(sel)) {
@@ -196,15 +161,12 @@ public class InstructorService {
                     }
 
                     if (quiz == null || mid == null || end == null) {
-                        // skip if incomplete components
-                        continue;
+                        continue; // incomplete
                     }
 
                     double percent = quiz * (wq / 100.0) + mid * (wm / 100.0) + end * (we / 100.0);
                     String letter = percentToLetter(percent);
 
-                    // Upsert final_grade for this user+section
-                    // Check existing row
                     String sel2 = "SELECT grade_id FROM grades WHERE user_id=? AND section_id=?";
                     Integer gid = null;
                     try (PreparedStatement ps3 = c.prepareStatement(sel2)) {
@@ -239,11 +201,18 @@ public class InstructorService {
         }
     }
 
+
     private String percentToLetter(double p) {
-        if (p >= 90) return "A";
-        if (p >= 80) return "B";
-        if (p >= 70) return "C";
-        if (p >= 60) return "D";
+        double cg = Math.round(p) / 10.0; // same CGPA conversion as UI
+
+        if (cg == 10) return "A+";
+        if (cg >= 9) return "A";
+        if (cg >= 8) return "B";
+        if (cg >= 7) return "B-";
+        if (cg >= 6) return "C";
+        if (cg >= 5) return "C-";
+        if (cg >= 4) return "D+";
+        if (cg >= 3) return "D";
         return "F";
     }
 }

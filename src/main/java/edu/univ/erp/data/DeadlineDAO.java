@@ -22,7 +22,6 @@ public class DeadlineDAO {
         return null;
     }
 
-    // ADMIN: set/override deadline
     public static boolean setDropDeadline(int sectionId, Date deadline) throws SQLException {
         String sql = """
             INSERT INTO deadlines (section_id, drop_deadline)

@@ -17,7 +17,7 @@ public class EnrollmentDAO {
             }
         }
 
-        // check capacity
+
         String capSql = "SELECT capacity, (SELECT COUNT(*) FROM enrollments e WHERE e.section_id = ? AND e.status='enrolled') as taken FROM sections WHERE section_id = ?";
         try (Connection c = DBUtil.getERPConnection();
              PreparedStatement ps = c.prepareStatement(capSql)) {
