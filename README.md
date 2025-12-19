@@ -110,49 +110,53 @@ cd UniversityERP
 
 
 
-### 🧪 Validation & Safety Checks
+## 🧪 Validation & Safety Checks
 
--Duplicate enrollments are prevented
+- Duplicate enrollments are prevented  
+- Section capacity is strictly enforced  
+- Deadline-based drop restrictions are applied  
+- Role-based access control is enforced at every write operation  
+- Maintenance Mode blocks all student and instructor modifications  
+- Clear and user-friendly error messages are shown  
 
--Section capacity is strictly enforced
+---
 
--Deadline-based drop restrictions are applied
+## 🔧 Maintenance Mode
 
--Role-based access control is enforced at every write operation
+- Controlled by the **Admin**
+- When enabled:
+  - Students and Instructors can only view data
+  - All create / update / delete operations are blocked
+- A visible banner is shown across the UI
+- Ensures consistency during maintenance or backup operations
 
--Maintenance Mode blocks all student and instructor modifications
+---
 
--Clear and user-friendly error messages are shown
+## 💾 Backup & Restore
 
-### 🔧 Maintenance Mode
+- ERP database can be backed up by the Admin
+- Restore functionality reverts the database to a previous state
+- Useful for demos, testing, and recovery
 
-Controlled by the Admin
-When enabled:
-Students and Instructors can only view data
-All create / update / delete operations are blocked
-A visible banner is shown across the UI
-Ensures consistency during maintenance or backup operations
+---
 
-### 💾 Backup & Restore
+## 📄 Documentation Included
 
-ERP database can be backed up by the Admin
-Restore functionality reverts the database to a previous state
-Useful for demos, testing, and recovery
+- UML and architecture diagrams
+- Test plan and test summary
+- Seed scripts
+- Demo video
+- How-to-run guide
 
-### 📄 Documentation Included
+---
 
-UML and architecture diagrams
-Test plan and test summary
-Seed scripts
-Demo video
-How-to-run guide
+## 🎯 Learning Outcomes
 
-### 🎯 Learning Outcomes
+- DAO pattern and layered architecture
+- Secure authentication and authorization
+- Java Swing UI development
+- Maven-based project structure
+- Real-world ERP system design principles
 
-DAO pattern and layered architecture
-Secure authentication and authorization
-Java Swing UI development
-Maven-based project structure
-Real-world ERP system design principles
 
 
