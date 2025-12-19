@@ -126,48 +126,33 @@ cd UniversityERP
 
 ### 🔧 Maintenance Mode
 
--Controlled by the Admin
-
+Controlled by the Admin
 When enabled:
-
 Students and Instructors can only view data
-
 All create / update / delete operations are blocked
-
 A visible banner is shown across the UI
-
 Ensures consistency during maintenance or backup operations
 
 ### 💾 Backup & Restore
 
 ERP database can be backed up by the Admin
-
 Restore functionality reverts the database to a previous state
-
 Useful for demos, testing, and recovery
 
 ### 📄 Documentation Included
 
 UML and architecture diagrams
-
 Test plan and test summary
-
 Seed scripts
-
 Demo video
-
 How-to-run guide
 
 ### 🎯 Learning Outcomes
 
 DAO pattern and layered architecture
-
 Secure authentication and authorization
-
 Java Swing UI development
-
 Maven-based project structure
-
 Real-world ERP system design principles
 
 
