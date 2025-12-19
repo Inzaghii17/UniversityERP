@@ -106,26 +106,27 @@ edu.univ.erp
 ```bash
 git clone https://github.com/<your-username>/UniversityERP.git
 cd UniversityERP
+```
 
 
 
 ### 🧪 Validation & Safety Checks
 
-Duplicate enrollments are prevented
+-Duplicate enrollments are prevented
 
-Section capacity is strictly enforced
+-Section capacity is strictly enforced
 
-Deadline-based drop restrictions are applied
+-Deadline-based drop restrictions are applied
 
-Role-based access control is enforced at every write operation
+-Role-based access control is enforced at every write operation
 
-Maintenance Mode blocks all student and instructor modifications
+-Maintenance Mode blocks all student and instructor modifications
 
-Clear and user-friendly error messages are shown
+-Clear and user-friendly error messages are shown
 
 ### 🔧 Maintenance Mode
 
-Controlled by the Admin
+-Controlled by the Admin
 
 When enabled:
 
