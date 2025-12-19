@@ -49,13 +49,13 @@ Databases (Auth DB + ERP DB)
 ## 📦 Package Structure
 
 edu.univ.erp
-├── ui // All Swing UI frames and dialogs
-├── domain // Data models (Student, Course, Section, Grade, etc.)
-├── data // DAO classes (StudentDAO, CourseDAO, EnrollmentDAO, etc.)
-├── auth // Authentication & password hashing
-├── access // Role checks & maintenance enforcement
-├── util // Utilities (DB helpers, backup/restore)
-└── Main.java // Application entry point
+- ui // All Swing UI frames and dialogs
+- domain // Data models (Student, Course, Section, Grade, etc.)
+─ data // DAO classes (StudentDAO, CourseDAO, EnrollmentDAO, etc.)
+─ auth // Authentication & password hashing
+─ access // Role checks & maintenance enforcement
+─ util // Utilities (DB helpers, backup/restore)
+─ Main.java // Application entry point
 
 
 
@@ -157,6 +157,11 @@ cd UniversityERP
 - Java Swing UI development
 - Maven-based project structure
 - Real-world ERP system design principles
+
+
+## Contributors
+-Ishank Choudhary(Inzaghii-17)
+-Avni Yadav(avni-2301)
 
 
 
