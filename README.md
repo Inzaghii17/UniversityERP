@@ -46,9 +46,10 @@ Databases (Auth DB + ERP DB)
 
 ---
 
-## 📦 Package Structure
+#### 📦 Package Structure
 
 edu.univ.erp
+
 - ui // All Swing UI frames and dialogs
 - domain // Data models (Student, Course, Section, Grade, etc.)
 ─ data // DAO classes (StudentDAO, CourseDAO, EnrollmentDAO, etc.)
@@ -159,9 +160,9 @@ cd UniversityERP
 - Real-world ERP system design principles
 
 
-## Contributors
--Ishank Choudhary(Inzaghii-17)
--Avni Yadav(avni-2301)
+#### Contributors
 
+- **Ishank Choudhary** ([Inzaghii-17](https://github.com/Inzaghii-17))
+- **Avni Yadav** ([avni-2301](https://github.com/avni-2301))
 
 
