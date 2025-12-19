@@ -50,13 +50,13 @@ Databases (Auth DB + ERP DB)
 
 edu.univ.erp
 
-- ui // All Swing UI frames and dialogs
-- domain // Data models (Student, Course, Section, Grade, etc.)
-─ data // DAO classes (StudentDAO, CourseDAO, EnrollmentDAO, etc.)
-─ auth // Authentication & password hashing
-─ access // Role checks & maintenance enforcement
-─ util // Utilities (DB helpers, backup/restore)
-─ Main.java // Application entry point
+- ui 
+- domain 
+─ data 
+─ auth 
+─ access 
+─ util 
+─ Main.java 
 
 
 
