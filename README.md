@@ -50,13 +50,13 @@ Databases (Auth DB + ERP DB)
 
 edu.univ.erp
 
-- ui 
-- domain 
-─ data 
-─ auth 
-─ access 
-─ util 
-─ Main.java 
+ui 
+domain 
+data 
+auth 
+access 
+util 
+Main.java 
 
 
 
