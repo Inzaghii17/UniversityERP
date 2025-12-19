@@ -46,22 +46,6 @@ Databases (Auth DB + ERP DB)
 
 ---
 
-#### 📦 Package Structure
-
-edu.univ.erp
-
-ui 
-domain 
-data 
-auth 
-access 
-util 
-Main.java 
-
-
-
----
-
 ## 🔐 Authentication & Security Design
 
 - The system uses **two separate databases**:
