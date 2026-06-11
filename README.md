@@ -144,9 +144,3 @@ cd UniversityERP
 - Real-world ERP system design principles
 
 
-#### Contributors
-
-- **Ishank Choudhary** ([Inzaghii-17](https://github.com/Inzaghii-17))
-- **Avni Yadav** ([avni-2301](https://github.com/avni-2301))
-
-
